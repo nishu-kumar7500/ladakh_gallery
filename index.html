@@ -100,6 +100,7 @@
       <button id="next">Next →</button>
     </div>
     <div class="caption" id="caption"></div>
+    <div id="driveLink" style="margin-top:8px; text-align:center;"></div>
   </div>
 
   <script>
@@ -141,25 +142,49 @@
     let currentIndex = 0;
     const photoElement = document.getElementById("photo");
     const captionElement = document.getElementById("caption");
+    const driveLinkElement = document.getElementById("driveLink");
     const nextButton = document.getElementById("next");
     const prevButton = document.getElementById("prev");
 
     function getMediaSource(item) {
       if (item.id) {
-        // Google Drive file - direct preview link
-        return `https://drive.google.com/uc?id=${item.id}&export=view`;
+        // Google Drive file - try the canonical preview URL
+        return `https://drive.google.com/uc?export=view&id=${item.id}`;
       }
       return item.url; // Local file
     }
 
+    // Show a Drive link so you can open files directly if embedding fails
+    function getDriveFileUrl(id) {
+      return `https://drive.google.com/file/d/${id}/view`;
+    }
+
     function updateViewer() {
       const item = media[currentIndex];
+      photoElement.style.display = '';
       photoElement.src = getMediaSource(item);
       photoElement.alt = `Media ${currentIndex + 1} of ${media.length}`;
       captionElement.textContent = `${currentIndex + 1} / ${media.length} — ${item.name}`;
+      // Drive link for manual open (useful when embedding is blocked)
+      if (item.id && driveLinkElement) {
+        driveLinkElement.innerHTML = `<a href="${getDriveFileUrl(item.id)}" target="_blank" rel="noopener">Open in Google Drive</a>`;
+      } else if (driveLinkElement) {
+        driveLinkElement.textContent = '';
+      }
       prevButton.disabled = currentIndex === 0;
       nextButton.disabled = currentIndex === media.length - 1;
     }
+
+    // If an image fails to load, hide it and leave a Drive link for manual opening
+    photoElement.onerror = function () {
+      const item = media[currentIndex];
+      photoElement.style.display = 'none';
+      captionElement.textContent = `Failed to load — open in Google Drive: ${item.name}`;
+      if (item.id && driveLinkElement) {
+        driveLinkElement.innerHTML = `<a href="${getDriveFileUrl(item.id)}" target="_blank" rel="noopener">Open ${item.name} in Google Drive</a>`;
+      }
+      console.warn('Failed to load media', item);
+    };
 
     function showNext() {
       if (currentIndex < media.length - 1) {
