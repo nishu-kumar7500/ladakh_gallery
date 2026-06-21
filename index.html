@@ -94,6 +94,7 @@
     </div>
     <div class="photo-frame">
       <img id="photo" src="" alt="Gallery photo" />
+      <video id="video" src="" controls style="display:none; width:100%; max-height:80vh; background:#000;" ></video>
       <!-- Fullscreen overlay -->
       <div id="overlay" style="display:none; position:fixed; inset:0; background:#000; align-items:center; justify-content:center; z-index:9999;">
         <img id="overlayImg" style="max-width:100%; max-height:100%; object-fit:contain;" alt="Full screen" />
@@ -111,34 +112,44 @@
     // Google Drive folder ID from: https://drive.google.com/drive/u/2/folders/1mBdYXcJtQmenhwume_qkajPpkoQU9Tw1
     const GOOGLE_DRIVE_FOLDER_ID = "1mBdYXcJtQmenhwume_qkajPpkoQU9Tw1";
 
-    // Use local images when available (download with download_images.ps1)
+    // ImageKit base URL (set this to your account's delivery URL)
+    // Example: const IMAGEKIT_BASE_URL = 'https://ik.imagekit.io/your_imagekit_id';
+    const IMAGEKIT_BASE_URL = "";
+
+    // Media list — replace file names if needed. If IMAGEKIT_BASE_URL is set,
+    // files are loaded from ImageKit as `${IMAGEKIT_BASE_URL}/${item.file}`.
+    // You can also include full `url` entries to point to any absolute URL.
     const media = [
-      { url: "images/IMG-20260621-WA0009.jpg", name: "IMG-20260621-WA0009" },
-      { url: "images/IMG-20260621-WA0015.jpg", name: "IMG-20260621-WA0015" },
-      { url: "images/IMG-20260621-WA0041.jpg", name: "IMG-20260621-WA0041" },
-      { url: "images/IMG20260614161208.jpg", name: "IMG20260614161208" },
-      { url: "images/IMG20260614161215.jpg", name: "IMG20260614161215" },
-      { url: "images/IMG20260614161226.jpg", name: "IMG20260614161226" },
-      { url: "images/IMG20260614161233.jpg", name: "IMG20260614161233" },
-      { url: "images/IMG20260615145008.jpg", name: "IMG20260615145008" },
-      { url: "images/IMG20260615145009.jpg", name: "IMG20260615145009" },
-      { url: "images/IMG20260615145052.jpg", name: "IMG20260615145052" },
-      { url: "images/IMG20260616065446.jpg", name: "IMG20260616065446" },
-      { url: "images/IMG20260616071718.jpg", name: "IMG20260616071718" },
-      { url: "images/IMG20260616071720.jpg", name: "IMG20260616071720" },
-      { url: "images/IMG20260616071837.jpg", name: "IMG20260616071837" },
-      { url: "images/IMG20260616144520.jpg", name: "IMG20260616144520" },
-      { url: "images/IMG20260616144629.jpg", name: "IMG20260616144629" },
-      { url: "images/IMG20260617143245.jpg", name: "IMG20260617143245" },
-      { url: "images/IMG20260617143311.jpg", name: "IMG20260617143311" },
-      { url: "images/IMG20260617143347.jpg", name: "IMG20260617143347" },
-      { url: "images/IMG20260617181723.jpg", name: "IMG20260617181723" },
-      { url: "images/IMG20260617181727.jpg", name: "IMG20260617181727" },
-      { url: "images/IMG20260617205438.jpg", name: "IMG20260617205438" }
+      { file: "IMG-20260621-WA0009.jpg", name: "IMG-20260621-WA0009" },
+      { file: "IMG-20260621-WA0015.jpg", name: "IMG-20260621-WA0015" },
+      { file: "IMG-20260621-WA0041.jpg", name: "IMG-20260621-WA0041" },
+      { file: "IMG20260614161208.jpg", name: "IMG20260614161208" },
+      { file: "IMG20260614161215.jpg", name: "IMG20260614161215" },
+      { file: "IMG20260614161226.jpg", name: "IMG20260614161226" },
+      { file: "IMG20260614161233.jpg", name: "IMG20260614161233" },
+      { file: "IMG20260615145008.jpg", name: "IMG20260615145008" },
+      { file: "IMG20260615145009.jpg", name: "IMG20260615145009" },
+      { file: "IMG20260615145052.jpg", name: "IMG20260615145052" },
+      { file: "IMG20260616065446.jpg", name: "IMG20260616065446" },
+      { file: "IMG20260616071718.jpg", name: "IMG20260616071718" },
+      { file: "IMG20260616071720.jpg", name: "IMG20260616071720" },
+      { file: "IMG20260616071837.jpg", name: "IMG20260616071837" },
+      { file: "IMG20260616144520.jpg", name: "IMG20260616144520" },
+      { file: "IMG20260616144629.jpg", name: "IMG20260616144629" },
+      { file: "IMG20260617143245.jpg", name: "IMG20260617143245" },
+      { file: "IMG20260617143311.jpg", name: "IMG20260617143311" },
+      { file: "IMG20260617143347.jpg", name: "IMG20260617143347" },
+      { file: "IMG20260617181723.jpg", name: "IMG20260617181723" },
+      { file: "IMG20260617181727.jpg", name: "IMG20260617181727" },
+      { file: "IMG20260617205438.jpg", name: "IMG20260617205438" },
+      // example video entries
+      { file: "VID20260614143128.mp4", name: "VID20260614143128" },
+      { file: "VID20260614143350.mp4", name: "VID20260614143350" }
     ];
 
     let currentIndex = 0;
     const photoElement = document.getElementById("photo");
+    const videoElement = document.getElementById("video");
     const captionElement = document.getElementById("caption");
     const driveLinkElement = document.getElementById("driveLink");
     const nextButton = document.getElementById("next");
@@ -155,11 +166,15 @@
     }
 
     function getMediaSource(item) {
-      if (item.id) {
-        // return first candidate; updateViewer will try alternatives on error
-        return getDriveSources(item.id)[0];
-      }
-      return item.url; // Local file
+      // explicit full URL wins
+      if (item.url) return item.url;
+      // ImageKit delivery if configured
+      if (IMAGEKIT_BASE_URL && item.file) return `${IMAGEKIT_BASE_URL}/${item.file}`;
+      // Drive fallback if id present
+      if (item.id) return getDriveSources(item.id)[0];
+      // local images folder fallback
+      if (item.file) return `images/${item.file}`;
+      return '';
     }
 
     // Show a Drive link so you can open files directly if embedding fails
@@ -169,16 +184,37 @@
 
     function updateViewer() {
       const item = media[currentIndex];
-      photoElement.style.display = '';
-      photoElement.src = getMediaSource(item);
-      photoElement.alt = `Media ${currentIndex + 1} of ${media.length}`;
+      const src = getMediaSource(item);
+      const isVideo = /\.(mp4|webm|ogg)$/i.test(src) || (item.file && /\.(mp4|webm|ogg)$/i.test(item.file));
+
+      // hide both initially
+      photoElement.style.display = 'none';
+      videoElement.style.display = 'none';
+
+      if (isVideo) {
+        videoElement.src = src;
+        videoElement.style.display = '';
+        videoElement.load();
+      } else {
+        // If item has a Drive id and no IMAGEKIT_BASE_URL, try multiple Drive sources
+        if (item.id && !IMAGEKIT_BASE_URL) {
+          tryDriveSources(item);
+        } else {
+          photoElement.src = src;
+          photoElement.style.display = '';
+        }
+      }
+
       captionElement.textContent = `${currentIndex + 1} / ${media.length} — ${item.name}`;
-      // Drive link for manual open (useful when embedding is blocked)
+
       if (item.id && driveLinkElement) {
         driveLinkElement.innerHTML = `<a href="${getDriveFileUrl(item.id)}" target="_blank" rel="noopener">Open in Google Drive</a>`;
+      } else if (IMAGEKIT_BASE_URL && item.file && driveLinkElement) {
+        driveLinkElement.innerHTML = `<a href="${IMAGEKIT_BASE_URL}/${item.file}" target="_blank" rel="noopener">Open in ImageKit</a>`;
       } else if (driveLinkElement) {
         driveLinkElement.textContent = '';
       }
+
       prevButton.disabled = currentIndex === 0;
       nextButton.disabled = currentIndex === media.length - 1;
     }
@@ -192,6 +228,7 @@
         if (attempt >= sources.length) {
           // all failed
           photoElement.style.display = 'none';
+          videoElement.style.display = 'none';
           captionElement.textContent = `Failed to load — open in Google Drive: ${item.name}`;
           if (item.id && driveLinkElement) {
             driveLinkElement.innerHTML = `<a href="${getDriveFileUrl(item.id)}" target="_blank" rel="noopener">Open ${item.name} in Google Drive</a>`;
@@ -201,19 +238,19 @@
         }
 
         const src = sources[attempt++];
-        photoElement.style.display = '';
-        photoElement.src = src;
-        // onerror will try the next source
-        photoElement.onerror = () => {
-          console.warn('Drive source failed, trying next:', src);
-          tryNext();
-        };
-        photoElement.onload = () => {
-          // loaded successfully; clear onerror handler
-          photoElement.onerror = null;
-          captionElement.textContent = `${currentIndex + 1} / ${media.length} — ${item.name}`;
-          if (driveLinkElement) driveLinkElement.innerHTML = `<a href="${getDriveFileUrl(item.id)}" target="_blank" rel="noopener">Open in Google Drive</a>`;
-        };
+        const isVideo = /\.(mp4|webm|ogg)$/i.test(src) || (item.file && /\.(mp4|webm|ogg)$/i.test(item.file));
+
+        if (isVideo) {
+          videoElement.style.display = '';
+          videoElement.src = src;
+          videoElement.onerror = () => { console.warn('Drive video source failed, trying next:', src); tryNext(); };
+          videoElement.onloadeddata = () => { videoElement.onerror = null; };
+        } else {
+          photoElement.style.display = '';
+          photoElement.src = src;
+          photoElement.onerror = () => { console.warn('Drive image source failed, trying next:', src); tryNext(); };
+          photoElement.onload = () => { photoElement.onerror = null; };
+        }
       }
 
       tryNext();
