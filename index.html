@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ladakh Gallery Viewer</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .viewer {
+      width: min(100%, 980px);
+      padding: 18px;
+      box-sizing: border-box;
+    }
+
+    .photo-frame {
+      position: relative;
+      display: grid;
+      place-items: center;
+      background: #000;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    img {
+      width: 100%;
+      height: auto;
+      display: block;
+      max-height: 80vh;
+      object-fit: contain;
+      background: #000;
+    }
+
+    .controls {
+      margin-top: 14px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    button {
+      flex: 1;
+      padding: 14px 18px;
+      border: none;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    button:hover {
+      background: rgba(255, 255, 255, 0.22);
+    }
+
+    button:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    .caption {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 0.98rem;
+      color: #ddd;
+    }
+
+    .instructions {
+      margin-bottom: 16px;
+      text-align: center;
+      color: #ccc;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="viewer">
+    <h1 style="text-align:center; margin-bottom:12px;">Ladakh Photo Viewer</h1>
+    <div class="instructions">
+      Use the arrows below or your keyboard left/right keys to browse the photos one by one.
+    </div>
+    <div class="photo-frame">
+      <img id="photo" src="" alt="Gallery photo" />
+    </div>
+    <div class="controls">
+      <button id="prev">← Previous</button>
+      <button id="next">Next →</button>
+    </div>
+    <div class="caption" id="caption"></div>
+  </div>
+
+  <script>
+    // Google Drive folder ID from: https://drive.google.com/drive/u/2/folders/1mBdYXcJtQmenhwume_qkajPpkoQU9Tw1
+    const GOOGLE_DRIVE_FOLDER_ID = "1mBdYXcJtQmenhwume_qkajPpkoQU9Tw1";
+
+    // Media files with Google Drive IDs
+    // To get file IDs: right-click file in Google Drive -> Get link -> extract ID from URL
+    const media = [
+      // Add your Google Drive file IDs here like:
+      // { id: "FILE_ID_HERE", name: "Photo Name" },
+      // 
+      // Or use local files (if stored locally):
+      { url: "IMG-20260621-WA0009.jpg", name: "IMG-20260621-WA0009.jpg" },
+      { url: "IMG-20260621-WA0015.jpg", name: "IMG-20260621-WA0015.jpg" },
+      { url: "IMG-20260621-WA0041.jpg", name: "IMG-20260621-WA0041.jpg" },
+      { url: "IMG20260614161208.jpg", name: "IMG20260614161208.jpg" },
+      { url: "IMG20260614161215.jpg", name: "IMG20260614161215.jpg" },
+      { url: "IMG20260614161226.jpg", name: "IMG20260614161226.jpg" },
+      { url: "IMG20260614161233.jpg", name: "IMG20260614161233.jpg" },
+      { url: "IMG20260615145008.jpg", name: "IMG20260615145008.jpg" },
+      { url: "IMG20260615145009.jpg", name: "IMG20260615145009.jpg" },
+      { url: "IMG20260615145052.jpg", name: "IMG20260615145052.jpg" },
+      { url: "IMG20260616065446.jpg", name: "IMG20260616065446.jpg" },
+      { url: "IMG20260616071718.jpg", name: "IMG20260616071718.jpg" },
+      { url: "IMG20260616071720.jpg", name: "IMG20260616071720.jpg" },
+      { url: "IMG20260616071837.jpg", name: "IMG20260616071837.jpg" },
+      { url: "IMG20260616144520.jpg", name: "IMG20260616144520.jpg" },
+      { url: "IMG20260616144629.jpg", name: "IMG20260616144629.jpg" },
+      { url: "IMG20260617143245.jpg", name: "IMG20260617143245.jpg" },
+      { url: "IMG20260617143311.jpg", name: "IMG20260617143311.jpg" },
+      { url: "IMG20260617143347.jpg", name: "IMG20260617143347.jpg" },
+      { url: "IMG20260617181723.jpg", name: "IMG20260617181723.jpg" },
+      { url: "IMG20260617181727.jpg", name: "IMG20260617181727.jpg" },
+      { url: "IMG20260617205438.jpg", name: "IMG20260617205438.jpg" }
+    ];
+
+    let currentIndex = 0;
+    const photoElement = document.getElementById("photo");
+    const captionElement = document.getElementById("caption");
+    const nextButton = document.getElementById("next");
+    const prevButton = document.getElementById("prev");
+
+    function getMediaSource(item) {
+      if (item.id) {
+        // Google Drive file - direct preview link
+        return `https://drive.google.com/uc?id=${item.id}&export=view`;
+      }
+      return item.url; // Local file
+    }
+
+    function updateViewer() {
+      const item = media[currentIndex];
+      photoElement.src = getMediaSource(item);
+      photoElement.alt = `Media ${currentIndex + 1} of ${media.length}`;
+      captionElement.textContent = `${currentIndex + 1} / ${media.length} — ${item.name}`;
+      prevButton.disabled = currentIndex === 0;
+      nextButton.disabled = currentIndex === media.length - 1;
+    }
+
+    function showNext() {
+      if (currentIndex < media.length - 1) {
+        currentIndex += 1;
+        updateViewer();
+      }
+    }
+
+    function showPrev() {
+      if (currentIndex > 0) {
+        currentIndex -= 1;
+        updateViewer();
+      }
+    }
+
+    nextButton.addEventListener("click", showNext);
+    prevButton.addEventListener("click", showPrev);
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight") {
+        showNext();
+      } else if (event.key === "ArrowLeft") {
+        showPrev();
+      }
+    });
+
+    updateViewer();
+  </script>
+</body>
+</html>

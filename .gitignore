@@ -1,0 +1,34 @@
+# Ignore all photo files
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.webp
+
+# Ignore all video files
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.flv
+*.wmv
+
+# Ignore OS specific files
+.DS_Store
+Thumbs.db
+
+# Ignore node_modules (if using Node.js)
+node_modules/
+
+# Ignore IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Keep only essential files:
+# index.html - will be tracked
+# GOOGLE_DRIVE_SETUP.md - will be tracked
+# .gitattributes - will be tracked
