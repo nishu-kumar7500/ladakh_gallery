@@ -144,10 +144,20 @@
     const nextButton = document.getElementById("next");
     const prevButton = document.getElementById("prev");
 
+    // Return an array of possible Drive URLs for an ID (tries multiple variants)
+    function getDriveSources(id) {
+      return [
+        `https://drive.google.com/uc?export=view&id=${id}`,
+        `https://drive.google.com/uc?export=download&id=${id}`,
+        `https://drive.google.com/thumbnail?id=${id}`,
+        `https://drive.google.com/thumbnail?sz=w1200&id=${id}`
+      ];
+    }
+
     function getMediaSource(item) {
       if (item.id) {
-        // Google Drive file - try the canonical preview URL
-        return `https://drive.google.com/uc?export=view&id=${item.id}`;
+        // return first candidate; updateViewer will try alternatives on error
+        return getDriveSources(item.id)[0];
       }
       return item.url; // Local file
     }
@@ -173,16 +183,41 @@
       nextButton.disabled = currentIndex === media.length - 1;
     }
 
-    // If an image fails to load, hide it and leave a Drive link for manual opening
-    photoElement.onerror = function () {
-      const item = media[currentIndex];
-      photoElement.style.display = 'none';
-      captionElement.textContent = `Failed to load — open in Google Drive: ${item.name}`;
-      if (item.id && driveLinkElement) {
-        driveLinkElement.innerHTML = `<a href="${getDriveFileUrl(item.id)}" target="_blank" rel="noopener">Open ${item.name} in Google Drive</a>`;
+    // Try multiple Drive URL variants before failing
+    function tryDriveSources(item) {
+      const sources = getDriveSources(item.id || '');
+      let attempt = 0;
+
+      function tryNext() {
+        if (attempt >= sources.length) {
+          // all failed
+          photoElement.style.display = 'none';
+          captionElement.textContent = `Failed to load — open in Google Drive: ${item.name}`;
+          if (item.id && driveLinkElement) {
+            driveLinkElement.innerHTML = `<a href="${getDriveFileUrl(item.id)}" target="_blank" rel="noopener">Open ${item.name} in Google Drive</a>`;
+          }
+          console.warn('All Drive source attempts failed for', item);
+          return;
+        }
+
+        const src = sources[attempt++];
+        photoElement.style.display = '';
+        photoElement.src = src;
+        // onerror will try the next source
+        photoElement.onerror = () => {
+          console.warn('Drive source failed, trying next:', src);
+          tryNext();
+        };
+        photoElement.onload = () => {
+          // loaded successfully; clear onerror handler
+          photoElement.onerror = null;
+          captionElement.textContent = `${currentIndex + 1} / ${media.length} — ${item.name}`;
+          if (driveLinkElement) driveLinkElement.innerHTML = `<a href="${getDriveFileUrl(item.id)}" target="_blank" rel="noopener">Open in Google Drive</a>`;
+        };
       }
-      console.warn('Failed to load media', item);
-    };
+
+      tryNext();
+    }
 
       // Fullscreen overlay handlers
       const overlay = document.getElementById('overlay');
