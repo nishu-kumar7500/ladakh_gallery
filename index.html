@@ -107,41 +107,36 @@
     const GOOGLE_DRIVE_FOLDER_ID = "1mBdYXcJtQmenhwume_qkajPpkoQU9Tw1";
 
     // Media files from Google Drive folder: https://drive.google.com/drive/u/2/folders/1mBdYXcJtQmenhwume_qkajPpkoQU9Tw1
-    // To get file IDs: right-click file -> Get link -> extract ID from URL
+    // Real file IDs extracted from your Google Drive
     const media = [
-      { id: "1ABC123DEF456GHI789JKL012MNO345PQR", name: "IMG-20260621-WA0009" },
-      { id: "1BCD234EFG567HIJ890KLM123NOP456QRS", name: "IMG-20260621-WA0015" },
-      { id: "1CDE345FGH678IJK901LMN234OPQ567RST", name: "IMG-20260621-WA0041" },
-      { id: "1DEF456GHI789JKL012MNO345PQR678STU", name: "IMG20260614161208" },
-      { id: "1EFG567HIJ890KLM123NOP456QRS789TUV", name: "IMG20260614161215" },
-      { id: "1FGH678IJK901LMN234OPQ567RST890UVW", name: "IMG20260614161226" },
-      { id: "1GHI789JKL012MNO345PQR678STU901VWX", name: "IMG20260614161233" },
-      { id: "1HIJ890KLM123NOP456QRS789TUV012WXY", name: "IMG20260615145008" },
-      { id: "1IJK901LMN234OPQ567RST890UVW123XYZ", name: "IMG20260615145009" },
-      { id: "1JKL012MNO345PQR678STU901VWX234YZA", name: "IMG20260615145052" },
-      { id: "1KLM123NOP456QRS789TUV012WXY345ZAB", name: "IMG20260616065446" },
-      { id: "1LMN234OPQ567RST890UVW123XYZ456ABC", name: "IMG20260616071718" },
-      { id: "1MNO345PQR678STU901VWX234YZA567BCD", name: "IMG20260616071720" },
-      { id: "1NOP456QRS789TUV012WXY345ZAB678CDE", name: "IMG20260616071837" },
-      { id: "1OPQ567RST890UVW123XYZ456ABC789DEF", name: "IMG20260616144520" },
-      { id: "1PQR678STU901VWX234YZA567BCD890EFG", name: "IMG20260616144629" },
-      { id: "1QRS789TUV012WXY345ZAB678CDE901FGH", name: "IMG20260617143245" },
-      { id: "1RST890UVW123XYZ456ABC789DEF012GHI", name: "IMG20260617143311" },
-      { id: "1STU901VWX234YZA567BCD890EFG123HIJ", name: "IMG20260617143347" },
-      { id: "1TUV012WXY345ZAB678CDE901FGH234IJK", name: "IMG20260617181723" },
-      { id: "1UVW123XYZ456ABC789DEF012GHI345JKL", name: "IMG20260617181727" },
-      { id: "1VWX234YZA567BCD890EFG123HIJ456KLM", name: "IMG20260617205438" },
-      { id: "1WXY345ZAB678CDE901FGH234IJK567LMN", name: "VID20260614143128 (Video)" },
-      { id: "1XYZ456ABC789DEF012GHI345JKL678MNO", name: "VID20260614143350 (Video)" },
-      { id: "1YZA567BCD890EFG123HIJ456KLM789NOP", name: "VID20260616071733 (Video)" }
+      { id: "1LeZTC-29LyeJB4hCuxn8yChHFyzKPQnq", name: "IMG-20260621-WA0009" },
+      { id: "1SMGvKO8dZG-vsFL5kSz0Njl9TuJjlcx_", name: "IMG-20260621-WA0015" },
+      { id: "1-GuEhQpHCyMeVwSx4w08DBcT7FuXfNaX", name: "IMG-20260621-WA0041" },
+      { id: "1lSkWQV8xZdYf17UtUHnQzDrw9gah6KJl", name: "IMG20260614161208" },
+      { id: "1oMTPRkoHtne68j2zpQT8pujpuP0bSsEH", name: "IMG20260614161215" },
+      { id: "1lShLDpI8_zz1iypHr5pN0U3xPKi_VgZ8", name: "IMG20260614161226" },
+      { id: "1Qq4HxEg8NPEN2DEXNoGg9JFQw6Kebu-0", name: "IMG20260614161233" },
+      { id: "1ZxMuiRNrnrTmB4YpaH8neyRjeimVwPzw", name: "IMG20260615145008" },
+      { id: "19WDUek-lOFzU4l13ahryt3yIkw5TqNpO", name: "IMG20260615145009" },
+      { id: "19dJhdbsmI9s_3xER8a-7wM_KWRwFPAZH", name: "IMG20260615145052" },
+      { id: "1ylk54ydvy9EosO0_pBlHDl2COJXo7Moa", name: "IMG20260616065446" },
+      { id: "16VHVslQ7tQK4vgr37SfITbF74t1lwLZr", name: "IMG20260616071718" },
+      { id: "1O3p1XaKKI9JAPbcYPKgZ9Iy1eLBkmgl9", name: "IMG20260616071720" },
+      { id: "1Q1CMIQERL6nG4qx3KQTlMyfNaGuVjr58", name: "IMG20260616071837" },
+      { id: "1WqVlweOwgAwMmTNGtJwqTiTMdphGWqsw", name: "IMG20260616144520" },
+      { id: "1EX4dEqjVlOsEaGPXQb8IA0G6DYnYHkI6", name: "IMG20260616144629" },
+      { id: "1VrfNK-X0yPt-NjNHQj2HEy1hoRYw4dLC", name: "IMG20260617143245" },
+      { id: "1nr1_yv1pngVVzybnI3m3uC3bjQDmBBk8", name: "IMG20260617143311" },
+      { id: "1zZD5IFQhx-gOKIpV9PsbD-56SoHZfA8P", name: "IMG20260617143347" },
+      { id: "1uJ50qHRJR4bvbTdXuHt9VdJ5NOtQPxf1", name: "IMG20260617181723" },
+      { id: "1WiXQhphtaKPwVkCkin4CiB-8LJ22cM1P", name: "IMG20260617181727" },
+      { id: "1YO-CpH2JoYbhWlkdUnUHJ4CzAbFOwObT", name: "IMG20260617205438" },
+      { id: "17Nq3MTYgNyqWhwoRR-pJ5FZ6O_8Tn74Y", name: "VID20260614143128" },
+      { id: "13vwyyzA07FrZ839jONjzad1Tg3zTBGLQ", name: "VID20260614143350" },
+      { id: "1eyuZYApWysMBtqglOgM3CL2rNO1HFyG2", name: "VID20260616071733" },
+      { id: "1LZ2ieRIsnEHFnyNQBCAoyWvVS0ExbrWp", name: "VID20260616145012" },
+      { id: "1OpouySG-pF19309yTVIsgMnxKkal78WO", name: "VID20260616145149" }
     ];
-
-    // ⚠️ IMPORTANT: Replace the placeholder file IDs above with actual IDs from your Google Drive
-    // Steps to get real file IDs:
-    // 1. Visit: https://drive.google.com/drive/u/2/folders/1mBdYXcJtQmenhwume_qkajPpkoQU9Tw1
-    // 2. Right-click each file → "Get link"
-    // 3. Copy the URL: https://drive.google.com/file/d/FILE_ID_HERE/view?usp=sharing
-    // 4. Extract FILE_ID and replace above
 
     let currentIndex = 0;
     const photoElement = document.getElementById("photo");
